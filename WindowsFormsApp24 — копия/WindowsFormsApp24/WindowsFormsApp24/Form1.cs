@@ -57,8 +57,7 @@ namespace WindowsFormsApp24
             f.Owner = this;
             f.currentRow = null;
             f.Text = "Добавление";
-            f.ShowDialog();
-            this.студентыTableAdapter.Fill(this.группа_студентовDataSet.Студенты);
+            f.Show();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -67,8 +66,7 @@ namespace WindowsFormsApp24
             f.Owner = this;
             f.currentRow = студентыBindingSource.Current as DataRowView;
             f.Text = "Редактирование";
-            f.ShowDialog();
-            this.студентыTableAdapter.Fill(this.группа_студентовDataSet.Студенты);
+            f.Show();
         }
 
         private void поискПоФамилииToolStripMenuItem_Click(object sender, EventArgs e)
