@@ -66,11 +66,13 @@ namespace WindowsFormsApp24
                 return;
             }
 
+            int kod = 0;
             string query;
             if (currentRow == null)
             {
-                query = "INSERT INTO Студенты (Фамилия, Имя, [Дата рождения], Пол, Улица, Дом, Квартира, Класс, Группа, Хобби) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                kod = NextCode();
+                query = "INSERT INTO Студенты (Код, Фамилия, Имя, [Дата рождения], Пол, Улица, Дом, Квартира, Класс, Группа, Хобби) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             }
             else
             {
@@ -79,6 +81,10 @@ namespace WindowsFormsApp24
             }
 
             OleDbCommand command = new OleDbCommand(query, myConnection);
+            if (currentRow == null)
+            {
+                command.Parameters.AddWithValue("Код", kod);
+            }
             command.Parameters.AddWithValue("Фамилия", txtSurname.Text);
             command.Parameters.AddWithValue("Имя", txtName.Text);
             command.Parameters.AddWithValue("Дата рождения", birth);
@@ -107,6 +113,17 @@ namespace WindowsFormsApp24
             }
 
             Close();
+        }
+
+        private int NextCode()
+        {
+            OleDbCommand command = new OleDbCommand("SELECT MAX(Код) FROM Студенты", myConnection);
+            object max = command.ExecuteScalar();
+            if (max == DBNull.Value)
+            {
+                return 1;
+            }
+            return Convert.ToInt32(max) + 1;
         }
 
         private static object Number(string text)
