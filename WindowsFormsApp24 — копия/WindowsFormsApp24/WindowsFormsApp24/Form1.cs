@@ -38,7 +38,19 @@ namespace WindowsFormsApp24
 
         private void button3_Click(object sender, EventArgs e)
         {
-            int kod = Convert.ToInt32(textBox1.Text);
+            int kod;
+            if (!int.TryParse(textBox1.Text, out kod))
+            {
+                MessageBox.Show("Введите код");
+                return;
+            }
+
+            DialogResult result = MessageBox.Show("Вы уверены, что хотите удалить?", "Подтверждение", MessageBoxButtons.YesNo);
+            if (result == DialogResult.No)
+            {
+                return;
+            }
+
             string query = "DELETE FROM Студенты WHERE Код = " + kod;
             OleDbCommand command = new OleDbCommand(query, myConnection);
             command.ExecuteNonQuery();
