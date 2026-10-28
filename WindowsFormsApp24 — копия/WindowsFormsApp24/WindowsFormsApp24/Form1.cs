@@ -86,5 +86,69 @@ namespace WindowsFormsApp24
             f.s = "Введите номер дома";
             f.Show();
         }
+
+        private void ShowQuery(string title, string query)
+        {
+            Form4 f = new Form4();
+            f.Owner = this;
+            f.Text = title;
+            f.sql = query;
+            f.Show();
+        }
+
+        private void запрос1ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Родились в 2001 году", "SELECT Фамилия, Имя FROM Студенты WHERE Year([Дата рождения]) = 2001");
+        }
+
+        private void запрос2ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Улица Пушкина", "SELECT Фамилия, Имя FROM Студенты WHERE Улица LIKE '%Пушкин%'");
+        }
+
+        private void запрос3ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Дом меньше 50", "SELECT Фамилия, Имя FROM Студенты WHERE Дом < 50");
+        }
+
+        private void запрос4ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Квартира меньше 12", "SELECT Фамилия, Имя FROM Студенты WHERE Квартира < 12");
+        }
+
+        private void запрос5ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Мужские имена", "SELECT Фамилия, Имя FROM Студенты WHERE Пол = True");
+        }
+
+        private void запрос6ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Фамилия на С", "SELECT Фамилия, Имя FROM Студенты WHERE Фамилия LIKE 'С%'");
+        }
+
+        private void запрос7ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Фамилия на Е, имя на Н", "SELECT Фамилия, Имя FROM Студенты WHERE Фамилия LIKE 'Е%' AND Имя LIKE 'Н%'");
+        }
+
+        private void запрос8ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Не занимаются тяжелой атлетикой", "SELECT Фамилия, Имя FROM Студенты WHERE Хобби IS NULL OR Хобби NOT LIKE '%тяжел%'");
+        }
+
+        private void запрос9ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Родились в 2004 году", "SELECT Фамилия, Имя FROM Студенты WHERE Year([Дата рождения]) = 2004");
+        }
+
+        private void запрос10ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Родились сегодня", "SELECT Фамилия, Имя FROM Студенты WHERE [Дата рождения] = Date()");
+        }
+
+        private void запрос11ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowQuery("Без хобби", "SELECT Фамилия, Имя FROM Студенты WHERE Хобби IS NULL OR Хобби = ''");
+        }
     }
 }
