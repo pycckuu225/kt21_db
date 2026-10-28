@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Data.OleDb;
+using System.Globalization;
+using System.Windows.Forms;
 
 namespace WindowsFormsApp24
 {
@@ -16,6 +11,7 @@ namespace WindowsFormsApp24
         public DataRowView currentRow;
         public static string connectString = "Provider = Microsoft.Jet.OLEDB.4.0; Data Source = Группа студентов.mdb";
         private OleDbConnection myConnection;
+
         public Form2()
         {
             InitializeComponent();
@@ -25,52 +21,106 @@ namespace WindowsFormsApp24
 
         private void Form2_Load(object sender, EventArgs e)
         {
-            if (currentRow != null)
-            {
-                textBox1.Text = currentRow.Row["Код"].ToString();
-                textBox2.Text = currentRow.Row["Фамилия"].ToString();
-                textBox3.Text = currentRow.Row["Имя"].ToString();
-                textBox4.Text = currentRow.Row["Дата рождения"].ToString();
-                textBox5.Text = currentRow.Row["Пол"].ToString();
-                textBox6.Text = currentRow.Row["Улица"].ToString();
-                textBox7.Text = currentRow.Row["Дом"].ToString();
-                textBox8.Text = currentRow.Row["Квартира"].ToString();
-                textBox9.Text = currentRow.Row["Класс"].ToString();
-                textBox10.Text = currentRow.Row["Группа"].ToString();
-                textBox11.Text = currentRow.Row["Хобби"].ToString();
-            }
-        }
+            cmbGroup.Items.Add("основная");
+            cmbGroup.Items.Add("подготовительная");
+            cmbGroup.Items.Add("специальная");
+            cmbGroup.Items.Add("освобождена");
+            cmbGroup.SelectedIndex = 0;
+            txtBirth.Text = DateTime.Today.ToString("dd.MM.yyyy");
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            int kod = Convert.ToInt32(textBox1.Text);
-            string surname = textBox2.Text;
-            string name = textBox3.Text;
-            string DR = textBox4.Text;
-            bool male = Convert.ToBoolean(textBox5.Text);
-            string street = textBox6.Text;
-            int house = Convert.ToInt32(textBox7.Text);
-            int appart = Convert.ToInt32(textBox8.Text);
-            string clas = textBox9.Text;
-            string group = textBox10.Text;
-            string hobby = textBox11.Text;
-            string query = null;
             if (currentRow == null)
             {
-                query = "INSERT INTO Студенты (Код, Фамилия, Имя, [Дата рождения], Пол," +
-                     "Улица, Дом, Квартира, Класс, Группа, Хобби) VALUES (" + kod + ", '" + surname + "', '" + name + "', '" +
-                     DR + "', " + male + ", '" + street + "', " + house + ", " + appart + ", '" + clas + "', '" + group + "', '" +
-                     hobby + "')";
+                return;
+            }
+
+            txtSurname.Text = currentRow.Row["Фамилия"].ToString();
+            txtName.Text = currentRow.Row["Имя"].ToString();
+            txtStreet.Text = currentRow.Row["Улица"].ToString();
+            txtHouse.Text = currentRow.Row["Дом"].ToString();
+            txtFlat.Text = currentRow.Row["Квартира"].ToString();
+            txtClass.Text = currentRow.Row["Класс"].ToString();
+            txtHobby.Text = currentRow.Row["Хобби"].ToString();
+            chkMale.Checked = Convert.ToBoolean(currentRow.Row["Пол"]);
+
+            object birth = currentRow.Row["Дата рождения"];
+            if (birth != DBNull.Value)
+            {
+                txtBirth.Text = Convert.ToDateTime(birth).ToString("dd.MM.yyyy");
+            }
+
+            string group = currentRow.Row["Группа"].ToString();
+            if (!cmbGroup.Items.Contains(group))
+            {
+                cmbGroup.Items.Add(group);
+            }
+            cmbGroup.SelectedItem = group;
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            DateTime birth;
+            string[] formats = { "dd.MM.yyyy", "d.M.yyyy", "dd.MM.yy", "d.M.yy" };
+            if (!DateTime.TryParseExact(txtBirth.Text.Trim(), formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out birth))
+            {
+                MessageBox.Show("Введите дату в виде дд.мм.гггг");
+                return;
+            }
+
+            string query;
+            if (currentRow == null)
+            {
+                query = "INSERT INTO Студенты (Фамилия, Имя, [Дата рождения], Пол, Улица, Дом, Квартира, Класс, Группа, Хобби) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             }
             else
             {
-                query = $"UPDATE Студенты SET Фамилия = '{surname}', Имя = '{name}' WHERE Код = {kod}";
+                query = "UPDATE Студенты SET Фамилия = ?, Имя = ?, [Дата рождения] = ?, Пол = ?, Улица = ?, " +
+                        "Дом = ?, Квартира = ?, Класс = ?, Группа = ?, Хобби = ? WHERE Код = ?";
             }
- 
-            OleDbCommand comand = new OleDbCommand(query, myConnection);
-            comand.ExecuteNonQuery();
-            MessageBox.Show("Строка добавлена!");
+
+            OleDbCommand command = new OleDbCommand(query, myConnection);
+            command.Parameters.AddWithValue("Фамилия", txtSurname.Text);
+            command.Parameters.AddWithValue("Имя", txtName.Text);
+            command.Parameters.AddWithValue("Дата рождения", birth);
+            command.Parameters.AddWithValue("Пол", chkMale.Checked);
+            command.Parameters.AddWithValue("Улица", txtStreet.Text);
+            command.Parameters.AddWithValue("Дом", Number(txtHouse.Text));
+            command.Parameters.AddWithValue("Квартира", Number(txtFlat.Text));
+            command.Parameters.AddWithValue("Класс", txtClass.Text);
+            command.Parameters.AddWithValue("Группа", cmbGroup.Text);
+            command.Parameters.AddWithValue("Хобби", txtHobby.Text);
+
+            if (currentRow != null)
+            {
+                command.Parameters.AddWithValue("Код", Convert.ToInt32(currentRow.Row["Код"]));
+            }
+
+            command.ExecuteNonQuery();
+
+            if (currentRow == null)
+            {
+                MessageBox.Show("Строка добавлена!");
+            }
+            else
+            {
+                MessageBox.Show("Строка изменена!");
+            }
+
             Close();
+        }
+
+        private static object Number(string text)
+        {
+            if (text.Trim() == "")
+            {
+                return DBNull.Value;
+            }
+            return Convert.ToInt32(text);
+        }
+
+        private void Form2_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            myConnection.Close();
         }
     }
 }
